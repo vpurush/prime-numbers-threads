@@ -1,4 +1,7 @@
-use std::{thread, time::Instant};
+use std::{
+    thread::{self, JoinHandle},
+    time::Instant,
+};
 
 fn is_prime(n: u32) -> bool {
     let mut is_prime = true;
@@ -12,6 +15,7 @@ fn is_prime(n: u32) -> bool {
 
 fn main() {
     let now = Instant::now();
+    let mut join_handles: Vec<JoinHandle<()>> = vec![];
     for i in 1..10000 {
         let handle = thread::spawn(move || {
             if is_prime(i) {
@@ -20,8 +24,12 @@ fn main() {
                 println!("{} is not prime", i)
             }
         });
-        handle.join().unwrap();
+        join_handles.push(handle);
     }
+
+    join_handles.into_iter().for_each(|join_handle| {
+        join_handle.join().unwrap();
+    });
 
     let elapsed = now.elapsed();
     println!("Time to execute {:?}", elapsed);
